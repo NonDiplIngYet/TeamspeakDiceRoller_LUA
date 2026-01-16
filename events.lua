@@ -8,7 +8,7 @@
         Alick | Alex // DK_Alick
 
 	Version:
-		Beta 1.2
+		Beta 1.3
 	
     Disclaimer:
         This software is provided "as is", without warranty of any kind,
@@ -28,7 +28,7 @@ local response = ""
 local system = nil
 local OWNER_UNIQUE_ID = nil
 
--- Funktion um den Owner der TS INstanz festzulegen
+-- Funktion um den Owner der TS Instanz festzulegen
 function detectOwner(serverConnectionHandlerID)
 	if OWNER_UNIQUE_ID ~= nil then
         return OWNER_UNIQUE_ID
@@ -48,13 +48,14 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 	if fromName == "Alick | Alex" then
 		print("Gold")
 		response = "[color=#998811]"
-	elseif fromName == "Sir Kilmawa" then
+	elseif fromName == "Sir Kilmawa | Richard" then
 		print("Grün")
 		response = "[color=#116611]"
 	else
-		print("Default")
+		print("Default Color")
 		response = ""
 	end
+	
 	-- Simple D20 Roll from every mode
 	if aktiv and message == "!" then
 		print("-------- \nGeneric D20 \n--------\n")
@@ -81,10 +82,13 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		local values = {}
 		local talentMod = false
 		local simple = false
+		local krit = 0
+		local patz = 0
 		
 		for value in string.gmatch(content, "([^,]+)") do
 			table.insert(values, tonumber(value))
 		end
+		
 		local att1 = values[1]
 		local att2 = values[2]
 		local att3 = values[3]
@@ -94,6 +98,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		if att2 == nil and att3 == nil and skill == nil then
 			simple = true
 		end
+		
 		print("Attribut 1: " .. att1)
 		if simple ~= true then
 			print("Attribut 2: " .. att2)
@@ -114,13 +119,38 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 			response = response .. "\n[b]" .. fromName .. "[/b]" .. " würfelt eine DSA Probe: "
 		end
 		
-		local roll = dice.rollDice(3,20)
+		local roll = dice.rollDice(3,20)		
 		local roll1 = roll[1]
 		local roll2 = roll[2]
 		local roll3 = roll[3]
+		
+		if roll1 == 1 then
+			krit = krit+1
+		end
+		if roll2 == 1 then
+			krit = krit+1
+		end
+		if roll3 == 1 then
+			krit = krit+1
+		end
+		
+		if roll1 == 20 then
+			patz = patz+1
+		end
+		if roll2 == 20 then
+			patz = patz+1
+		end
+		if roll3 == 20 then
+			patz = patz+1
+		end
+		
 		print("Die Ergebnisse sind: [" .. roll1 .. ", " .. roll2 .. ", " .. roll3 .. "]")
+		
 		if simple then
 			response = response .. "[" .. roll1 .. "]\n" 
+			if roll1 == 1 or roll1 == 20 then
+				response = response .. "Bestätigungswurf: [" .. roll2 .. "]\n"
+			end
 		else
 			response = response .. " Die Würfe sind: [" .. roll1 .. ", " .. roll2 .. ", " .. roll3 .. "]\n" 
 		end
@@ -147,16 +177,27 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 				print("Rest Skill: " .. restSkill)
 				print("Att1: " .. att1 .. " Att2: " .. att2 .. " Att3: " .. att3)
 				print("W1: " .. roll1 .. " W2: " .. roll2 .. " W3: " .. roll3)
-				if restSkill >= 0 and restSkill <= skill then
-					taps = restSkill
+				if restSkill >= 0 and restSkill <= skill and krit <=1 and patz <=1 then
+					taps = restSkill					
 					response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
 					print("Mit " .. taps .. " TaP* bestanden")		
-				elseif restSkill >= 0 and restSkill > skill then
+				elseif restSkill >= 0 and restSkill > skill and krit <=1 and patz <=1 then
 					taps = skill
 					response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
 					print("Mit " .. taps .. " TaP* bestanden")		
-				elseif restSkill < 0 then
+				elseif restSkill < 0 and krit <=1 and patz <=1 then
 					response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
+					print("Notwendige Erleichterung: " .. math.abs(restSkill))
+				elseif restSkill >= 0 and restSkill <= skill and krit >1 then
+					taps = restSkill					
+					response = response .. "[b]KRITISCHER ERFOLG mit[/b] mit [b] " .. taps .. "* [/b] "
+					print("Krit mit " .. taps .. " TaP* bestanden")		
+				elseif restSkill >= 0 and restSkill > skill and krit >1 then
+					taps = skill
+					response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] " .. taps .. "* [/b] "
+					print("Mit " .. taps .. " TaP* bestanden")		
+				elseif restSkill < 0 and patz > 1 then
+					response = response .. "[b]PATZER.[/b] [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
 					print("Notwendige Erleichterung: " .. math.abs(restSkill))
 				end
 			elseif change > 0 then
@@ -229,10 +270,26 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 			print("Simple Probe")
 			if roll1 > att1 then
 				local erlei = roll1-att1
-				response = response .. "Misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. erlei				
+				if roll1 == 20 then
+					if roll2 > att1 then
+						response = response .. "PATZER. [b]\nNotwendige Erleichterung:  [/b]" .. erlei
+					else
+						response = response .. "Misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. erlei
+					end	
+				else
+					response = response .. "Misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. erlei
+				end					
 			else
 				local erschw = att1-roll1	
-				response = response .. "Bestanden. [b]\nMaximale Erschwernis:  [/b]" ..  erschw
+				if roll1 == 1 then
+					if roll2 < att1 then
+						response = response .. "KRITISCHER ERFOLG. [b]\nMaximale Erschwernis:  [/b]" ..  erschw
+					else
+						response = response .. "Bestanden. [b]\nMaximale Erschwernis:  [/b]" ..  erschw
+					end	
+				else
+					response = response .. "Bestanden. [b]\nMaximale Erschwernis:  [/b]" ..  erschw
+				end				
 			end
 			print("Att1: " .. att1)
 			print("W1: " .. roll1)
@@ -339,6 +396,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
 		
 	end
+	
 	-- Generic Dice Roll System
 	if aktiv and string.sub(message, 1, 1) == "?" then
 		print("Generic Dice Roll")
@@ -384,6 +442,22 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		--response = response .. "[b]Generisch[/b] \n? -> 1w6 \n! -> 1w20"
 		--response = response .. "\n?[Menge],[Würfel]"
 		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+	elseif 	message == "!statcheck" and aktiv then
+		local res4 = dice.averageTest(100000,4)
+		local res6 = dice.averageTest(100000,6)
+		local res8 = dice.averageTest(100000,8)
+		local res10 = dice.averageTest(100000,10)
+		local res12 = dice.averageTest(100000,12)
+		local res20 = dice.averageTest(100000,20)
+		local res100 = dice.averageTest(100000,100)
+		response = response .. "\n100000 D4 gewürfelt Durchschnitt: " .. res4
+		response = response .. "\n100000 D6 gewürfelt Durchschnitt: " .. res6
+		response = response .. "\n100000 D8 gewürfelt Durchschnitt: " .. res8
+		response = response .. "\n100000 D10 gewürfelt Durchschnitt: " .. res10
+		response = response .. "\n100000 D12 gewürfelt Durchschnitt: " .. res12
+		response = response .. "\n100000 D20 gewürfelt Durchschnitt: " .. res20
+		response = response .. "\n100000 D100 gewürfelt Durchschnitt: " .. res100
+		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
 	elseif 	message == "!sr" and aktiv then
 		system = "sr"
 		print("System Shadowrun")
@@ -399,7 +473,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, "[b]Tool Aus[/b]", 0)
 	end
 	
-	print("Roller: onTextMessageEvent: " .. serverConnectionHandlerID .. " " .. targetMode .. " " .. toID .. " " .. fromID .. " " .. fromName .. " " .. fromUniqueIdentifier .. " " .. message .. " " .. ffIgnored)
+	--print("Roller: onTextMessageEvent: " .. serverConnectionHandlerID .. " " .. targetMode .. " " .. toID .. " " .. fromID .. " " .. fromName .. " " .. fromUniqueIdentifier .. " " .. message .. " " .. ffIgnored)
 	return 0
 end
 

@@ -1,16 +1,13 @@
 -- Function to roll dice
 math.randomseed(os.time())
-local function rollDice(times, sides)	
-	print("Hi1")
+local function rollDice(times, sides)
 	local results = {}
 	local sum = 0
 	for i = 1, times do
 		local roll = math.random(1, sides)
 		results[i] = roll
 		sum = sum + roll
-		print("Hi2")
 	end
-	print("Hi3")
 	return results, sum
 end
 
@@ -42,6 +39,14 @@ local function d100()
 	return rollDice(1,100)
 end
 
+local function averageTest(size,die)
+	print("Hi1")
+	local res,avg = rollDice(size,die)
+	print("hi2")
+	res = avg/size
+	return res
+end
+
 local dice = {
 	_TYPE = 'module',
 	_NAME = 'dice',
@@ -53,6 +58,7 @@ local dice = {
 	d12 = d12,
 	d20 = d20,
 	d100 = d100,
+	averageTest = averageTest,
 };
 
 return dice;
