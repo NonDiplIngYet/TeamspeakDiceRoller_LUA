@@ -18,15 +18,10 @@ A simple and reusable Lua-based dice rolling utility. Designed for online rolepl
 All basic commands do still work in both specific modes
 ### Basic Commands
 !on -> Enable the Tool
-
 !off -> Disable the Tool
-
 !dsa -> Set the dice rolling system to "DSA" mode (for the german TTRPG "Das schwarze Auge")
-
 !sr  -> Set the dice rolling system to "SR" mode  (for the TTRPG "Shadowrun")
-
 ?    -> Rolls 1d6
-
 ?\<number1>,\<number2>   -> Rolls \<number1>d\<number2> / Is used like ?1,20 to roll 1d20 for example (more example would include ?5,6 for 5d6 and so on)
 ### DSA Mode
 !\<stat1>  -> 1d20 against stat1
