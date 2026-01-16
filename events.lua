@@ -49,7 +49,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		print("Gold")
 		response = "[color=#998811]"
 		
-	elseif (fromName == "Null-ARC | Fenrir" or fromName == "Tarek ibn Nazir | NARC") then
+	elseif (fromName == "Null-ARC | Fenrir" or fromName == "Tarek ben Nizar | NARC") then
 		print("Blau")
 		response = "[color=#4848FF]"
 		
