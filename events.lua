@@ -1,0 +1,391 @@
+--[===[
+    Roller Skript
+    ------------------
+    A simple and reusable Lua-based dice rolling utility.
+    Designed for online roleplaying using Teamspeak 3
+
+    Author:
+        Alick | Alex // DK_Alick
+
+	Version:
+		Beta 1.1
+	
+    Disclaimer:
+        This software is provided "as is", without warranty of any kind,
+        express or implied. The author is not liable for any damages
+        arising from the use of this software.
+		
+	ToDo:
+		- Kritische Treffer / Patzer für DSA
+		- Nutzbare Code Kommentare
+		- Bessere Zufallsmethoden
+		- OOP
+		- maybe Syntax von Lule übernehmen
+--]===]
+local aktiv = false
+local response = ""
+local system = nil
+local OWNER_UNIQUE_ID = nil
+
+-- Funktion um den Owner der TS INstanz festzulegen
+function detectOwner(serverConnectionHandlerID)
+	if OWNER_UNIQUE_ID ~= nil then
+        return OWNER_UNIQUE_ID
+    end
+    local myClientID = ts3.getClientID(serverConnectionHandlerID)
+    local uid = ts3.getClientVariableAsString(serverConnectionHandlerID, myClientID, ts3defs.ClientProperties.CLIENT_UNIQUE_IDENTIFIER)
+    return uid
+    
+end
+
+-- function to respond to messages (bloated as fuck, needs to be tamed)
+local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, fromID, fromName, fromUniqueIdentifier, message, ffIgnored)
+	--print("Message received")    ENABLE THIS FOR DEBUGGING ONLY
+	local owner = detectOwner(serverConnectionHandlerID)
+	-- Dice Roll System used in DSA mode
+	if aktiv and system == "dsa" and string.sub(message, 1, 1) == "!" and message ~= "!off" and message ~= "!sr" then
+	--if string.sub(message, 1, 1) == "!" then				
+		print("-------- \nDSA Probe gestartet \n--------\n")
+		local content = string.sub(message, 2, 99)
+		
+		-- Stupid W20 Roll
+		if content == "" then 
+			math.randomseed(os.time())
+			local roll = math.random(1,20)
+			response = "\n[b]" .. fromName .. "[/b]" .. " würfelt 1W20 - "
+			response = response .. "[b]" .. roll .. "[/b]"
+			ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+		end
+		
+		local values = {}
+		local talentMod = false
+		local simple = false
+		
+		for value in string.gmatch(content, "([^,]+)") do
+			table.insert(values, tonumber(value))
+		end
+		local att1 = values[1]
+		local att2 = values[2]
+		local att3 = values[3]
+		local skill = values[4]
+		local change = values[5]
+		
+		if att2 == nil and att3 == nil and skill == nil then
+			simple = true
+		end
+		print("Attribut 1: " .. att1)
+		if simple ~= true then
+			print("Attribut 2: " .. att2)
+			print("Attribut 3: " .. att3)
+			print("TaW: " .. skill)
+		end
+		
+		if change ~= nil then
+			talentMod = true
+			if change < 0 then
+			response = "\n[b]" .. fromName .. "[/b]" .. " würfelt eine DSA Talentprobe erleichtert um " .. math.abs(change) .. "\n"
+			elseif change > 0 then
+			response = "\n[b]" .. fromName .. "[/b]" .. " würfelt eine DSA Talentprobe erschwert um " .. change .. "\n"
+			end
+		elseif simple ~= true then
+			response = "\n[b]" .. fromName .. "[/b]" .. " würfelt eine DSA Talentprobe \n"
+		elseif simple then
+			response = "\n[b]" .. fromName .. "[/b]" .. " würfelt eine DSA Probe: "
+		end
+		
+		math.randomseed(os.time())
+		local roll1 = math.random(1,20)
+		local roll2 = math.random(1,20)
+		local roll3 = math.random(1,20)
+		print("Die Ergebnisse sind: [" .. roll1 .. ", " .. roll2 .. ", " .. roll3 .. "]")
+		if simple then
+			response = response .. "[" .. roll1 .. "]\n" 
+		else
+			response = response .. " Die Würfe sind: [" .. roll1 .. ", " .. roll2 .. ", " .. roll3 .. "]\n" 
+		end
+	
+		local restSkill = skill
+		
+		if talentMod then
+			if change < 0 then
+				print("Probe erleichtert")
+				change = math.abs(change)
+				restSkill = restSkill+change
+				if roll1 > att1 then
+					local result1 = roll1-att1
+					restSkill = restSkill-result1
+				end
+				if roll2 > att2 then
+					local result2 = roll2-att2
+					restSkill = restSkill-result2
+				end
+				if roll3 > att3 then
+					local result3 = roll3-att3
+					restSkill = restSkill-result3
+				end
+				print("Rest Skill: " .. restSkill)
+				print("Att1: " .. att1 .. " Att2: " .. att2 .. " Att3: " .. att3)
+				print("W1: " .. roll1 .. " W2: " .. roll2 .. " W3: " .. roll3)
+				if restSkill >= 0 and restSkill <= skill then
+					taps = restSkill
+					response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
+					print("Mit " .. taps .. " TaP* bestanden")		
+				elseif restSkill >= 0 and restSkill > skill then
+					taps = skill
+					response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
+					print("Mit " .. taps .. " TaP* bestanden")		
+				elseif restSkill < 0 then
+					response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
+					print("Notwendige Erleichterung: " .. math.abs(restSkill))
+				end
+			elseif change > 0 then
+				-- Erschwert um
+				print("Probe erschwert")
+				change = math.abs(change)
+				restSkill = restSkill-change
+				if restSkill < 0 then
+					print("Attributserschwernis")
+					att1 = att1+restSkill
+					att2 = att2+restSkill
+					att3 = att3+restSkill
+					if roll1 <= att1 and roll2 <= att2 and roll3 <= att3 then
+						response = response .. "Daher ist die Probe bestanden"
+					else
+						restSkill = 0
+						if roll1 > att1 then
+							local result1 = att1-roll1
+							restSkill = restSkill+result1
+						end
+						if roll2 > att2 then
+							local result2 = att2-roll2
+							restSkill = restSkill+result2
+						end
+						if roll3 > att3 then
+							local result3 = att3-roll3
+							restSkill = restSkill+result3
+						end
+						if restSkill < 0 then
+							response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
+							print("Notwendige Erleichterung: " .. math.abs(restSkill))
+						end
+					end
+					print("Rest Skill: " .. restSkill)
+					print("Att1: " .. att1 .. " Att2: " .. att2 .. " Att3: " .. att3)
+					print("W1: " .. roll1 .. " W2: " .. roll2 .. " W3: " .. roll3)
+				else
+					print("Talenterschwernis")
+					if roll1 > att1 then
+						local result1 = roll1-att1
+						restSkill = restSkill-result1
+					end
+					if roll2 > att2 then
+						local result2 = roll2-att2
+						restSkill = restSkill-result2
+					end
+					if roll3 > att3 then
+						local result3 = roll3-att3
+						restSkill = restSkill-result3
+					end
+					print("Rest Skill: " .. restSkill)
+					print("Att1: " .. att1 .. " Att2: " .. att2 .. " Att3: " .. att3)
+					print("W1: " .. roll1 .. " W2: " .. roll2 .. " W3: " .. roll3)
+					if restSkill >= 0 and restSkill <= skill then
+						taps = restSkill
+						response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
+						print("Mit " .. taps .. " TaP* bestanden")		
+					elseif restSkill >= 0 and restSkill > skill then
+						taps = skill
+						response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
+						print("Mit " .. taps .. " TaP* bestanden")		
+					elseif restSkill < 0 then
+						response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
+						print("Notwendige Erleichterung: " .. math.abs(restSkill))
+					end
+				end
+			end
+			print("-------- \nDSA Probe mit Mod beendet \n--------\n")
+		elseif simple then
+			print("Simple Probe")
+			if roll1 > att1 then
+				local erlei = roll1-att1
+				response = response .. "Misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. erlei				
+			else
+				local erschw = att1-roll1	
+				response = response .. "Bestanden. [b]\nMaximale Erschwernis:  [/b]" ..  erschw
+			end
+			print("Att1: " .. att1)
+			print("W1: " .. roll1)
+			print("-------- \nDSA Probe beendet \n--------\n")
+		else
+			print("Probe normal")
+			if roll1 > att1 then
+				local result1 = roll1-att1
+				restSkill = restSkill-result1
+			end
+			if roll2 > att2 then
+				local result2 = roll2-att2
+				restSkill = restSkill-result2
+			end
+			if roll3 > att3 then
+				local result3 = roll3-att3
+				restSkill = restSkill-result3
+			end		
+			print("Rest Skill: " .. restSkill)
+			print("Att1: " .. att1 .. " Att2: " .. att2 .. " Att3: " .. att3)
+			print("W1: " .. roll1 .. " W2: " .. roll2 .. " W3: " .. roll3)
+			if restSkill >= 0 and restSkill <= skill then
+				taps = restSkill			
+				response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
+				print("Mit " .. taps .. " TaP* bestanden")		
+			elseif restSkill < 0 then
+				response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
+				--print("Notwendige Erleichterung: " .. math.abs(restSkill))
+			end
+			print("-------- \nDSA Probe beendet \n--------\n")
+		end
+		--response = fromName .. " würfelt eine " .. roll1 .. ", " .. roll2 .. ", " .. roll3 .. "]" 
+		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+	end
+	
+	-- Dice Roll System used in SR mode
+	if aktiv and system == "sr" and string.sub(message, 1, 1) == "!" and message ~= "!off" and message ~= "!dsa" then
+		print("Generic Dice Roll for SR")
+		local content = string.sub(message, 2, 99)
+		local values = {}
+		local successes = 0
+		local ones = 0
+		local glitched = false
+		local edge = false
+		for value in string.gmatch(content, "([^,]+)") do
+			if value == "e" then edge = true end
+			table.insert(values, tonumber(value))
+		end
+		local pool = values[1]
+		if edge ~= true then
+			response = "\n[b]" .. fromName .. "[/b]" .. " würfelt " .. pool .. "W6\n"
+			for i = 1, pool do
+				local roll = math.random(1, 6)
+				response = response .. roll
+				if i < pool then 
+					response = response .. ", "
+				end		
+				if roll >= 5 then
+					successes = successes+1
+				end
+				if roll == 1 then
+					ones = ones+1
+				end
+			end
+			if ones >= math.ceil(pool/2) then
+				glitched = true
+			end
+			if glitched then
+				response = response .. "[b] \nGLITCHED[/b] \nErfolge:[b]" .. successes .. "[/b]"
+			else
+				response = response .. "\nErfolge:[b]" .. successes .. "[/b]"
+			end
+		else
+			response = "\n[b]" .. fromName .. "[/b]" .. " würfelt " .. pool .. "W6 mit [b]Edge[/b]\n"
+			local i = 1
+			local diceToRoll = pool
+			while i <= diceToRoll do
+				local roll = math.random(1, 6)
+				response = response .. roll						
+				if roll >= 5 then
+					successes = successes+1
+				end
+				if roll == 6 then
+					diceToRoll = diceToRoll+1
+				end
+				if i < diceToRoll then 
+					response = response .. ", "
+				end			
+				if roll == 1 and i <= pool then
+					ones = ones+1
+				end
+				i = i+1
+			end
+			response = response .. "\n" .. diceToRoll-pool .. " Würfel explodiert"
+			if ones >= math.ceil(pool/2) then
+				glitched = true
+			end
+			if glitched then
+				response = response .. "[b] \nGLITCHED[/b] \nErfolge:[b]" .. successes .. "[/b]"
+			else
+				response = response .. "\nErfolge:[b]" .. successes .. "[/b]"
+			end
+		end
+		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+		
+	end
+	-- Generic Dice Roll System used mainly in DSA mode
+	if aktiv and string.sub(message, 1, 1) == "?" and message ~= "!off" then
+		print("Generic Dice Roll for DSA")
+		local content = string.sub(message, 2, 99)
+		
+		-- Stupid W6 Roll
+		if content == "" then 
+			math.randomseed(os.time())
+			local roll = math.random(1,6)
+			response = "\n[b]" .. fromName .. "[/b]" .. " würfelt 1W6 - "
+			response = response .. "[b]" .. roll .. "[/b]"
+			ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+		end
+		local values = {}
+		local talentMod = false
+		local simple = false
+		
+		for value in string.gmatch(content, "([^,]+)") do
+			table.insert(values, tonumber(value))
+		end
+		local number = values[1]
+		local dice = values[2]		
+		response = "\n[b]" .. fromName .. "[/b]" .. " würfelt " .. number .. "W" .. dice .. "\n"
+		local result = 0
+		math.randomseed(os.time())
+		for i = 1, number do			
+			local roll = math.random(1,dice)
+			response = response .. roll
+			result = result+roll
+			if i < number then response = response .. " + " end		
+		end		
+		response = response .. " = " .. result
+		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+	end
+	
+	-- Powerswitch & Systemswitch
+	if message == "!on" and fromUniqueIdentifier == owner then 
+		aktiv = true
+		print("Tool Aktiv")
+		response = "[b]Tool Aktiv[/b]\nFolgende Befehle sind funktional \n!dsa - System DSA \n!sr- System Shadowrun \n?[Menge],[Würfel] \n!off - Tool aus"
+		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+	elseif 	message == "!dsa" and aktiv then
+		system = "dsa"
+		print("System DSA")
+		response = response .. "\n[b]System DSA[/b] \n![Wert] -> 1w20 Probe\n" 
+		response = response .. "![Attributwert],[Attributwert],[Attributwert],[Talentwert],<optional Mod> -> 3w20 Probe\n"
+		response = response .. "[b]Generisch[/b] \n? -> 1w20 \n! -> 1w20"
+		response = response .. "\n?[Menge],[Würfel]"
+		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+	elseif 	message == "!sr" and aktiv then
+		system = "sr"
+		print("System Shadowrun")
+		response = response .. "\n[b]System Shadowrun[/b] \n![Wert] -> [Wert]w6 Probe\n" 
+		response = response .. "![Wert],e -> Exploding w6 Probe\n"
+		response = response .. "[b]Generisch[/b] \n?[Menge],[Würfel]"
+		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+	elseif message == "!off" and aktiv then
+		aktiv = false
+		system = nil
+		print("Tool Aus")
+		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, "[b]Tool Aus[/b]", 0)
+	end
+	
+	--print("Roller: onTextMessageEvent: " .. serverConnectionHandlerID .. " " .. targetMode .. " " .. toID .. " " .. fromID .. " " .. fromName .. " " .. fromUniqueIdentifier .. " " .. message .. " " .. ffIgnored)
+	return 0
+end
+
+
+roller_events = {
+	onTextMessageEvent = onTextMessageEvent,
+}
