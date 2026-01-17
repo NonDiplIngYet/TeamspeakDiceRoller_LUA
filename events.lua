@@ -59,7 +59,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		response = "[color=#116611]"
 		
 	elseif fromUniqueIdentifier == "HigFMJk7fVRuTBuV84J6vG+Zhow=" or fromName == "Dr. Clean// Protheos | David" then
-		print("Emperors Children Lila")
+		print("Emperor's Children Lila")
 		response = "[color=#ff00ff]"
 		
 	elseif (fromName == "Engelsleiche" or fromName == "Jadira saba Nagar" or fromName == "Cassandra vom Düsterhain") then
@@ -87,8 +87,8 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
 	end
 
-		if aktiv and tonumber(string.sub(message, 2, 2)) then
-	
+	if aktiv and tonumber(string.sub(message, 2, 2)) then
+		
 		-- Dice Roll System used in DSA mode
 		if system == "dsa" and string.sub(message, 1, 1) == "!" then --and aktiv and tonumber(string.sub(message, 2, 2)) then --and message ~= "!off" and message ~= "!sr" and message ~= "!sr5" and message ~= "!kat" and message ~= "!deg" then
 		--if string.sub(message, 1, 1) == "!" then				
@@ -385,7 +385,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		end
 		
 		-- Dice Roll System used in SR mode
-		if aktiv and system == "sr" and string.sub(message, 1, 1) == "!" then --and aktiv and tonumber(string.sub(message, 2, 2)) then -- message ~= "!off" and message ~= "!dsa" and message ~= "!dsa4" and message ~= "!kat" and message ~= "!deg" then
+		if system == "sr" and string.sub(message, 1, 1) == "!" then --and aktiv and tonumber(string.sub(message, 2, 2)) then --and message ~= "!off" and message ~= "!dsa" and message ~= "!dsa4" and message ~= "!kat" and message ~= "!deg" then
 			print("Generic Dice Roll for SR")
 			local content = string.sub(message, 2, 99)
 			local values = {}
@@ -591,4 +591,5 @@ end
 roller_events = {
 	onTextMessageEvent = onTextMessageEvent,
 }
+
 
