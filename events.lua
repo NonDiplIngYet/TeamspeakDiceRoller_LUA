@@ -588,12 +588,3 @@ end
 roller_events = {
 	onTextMessageEvent = onTextMessageEvent,
 }
-
-roller_events = {
-	onTextMessageEvent = onTextMessageEvent,
-}
-
-
-
-
-
