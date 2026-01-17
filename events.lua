@@ -416,53 +416,54 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 	end
 	
 	-- Powerswitch & Systemswitch
-	if (message == "!on" or message == "!dice") and fromUniqueIdentifier == owner then 
-		aktiv = true
-		print("Tool Aktiv")
-		response = "[b]Tool Aktiv[/b]\n !help -> Zeigt Commands an"
-		--response = "[b]Tool Aktiv[/b]\nFolgende Befehle sind funktional \n!dsa - System DSA \n!sr- System Shadowrun \n?[Menge],[Würfel] \n!off - Tool aus"
-		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
-	elseif message == "!help" and aktiv then
-		response = response .. "\nFolgende Befehle sind funktional \n!dsa - System DSA \n!sr- System Shadowrun \n?[Menge],[Würfel] \n!off - Tool aus\n"
-		response = response .. "\n[b]System DSA[/b] \n![Wert] -> 1w20 Probe\n" 
-		response = response .. "![Attributwert],[Attributwert],[Attributwert],[Talentwert],<optional Mod> -> 3w20 Probe\n"
-		response = response .. "\n[b]System Shadowrun[/b] \n![Wert] -> [Wert]w6 Probe\n" 
-		response = response .. "![Wert],e -> Exploding w6 Probe\n"
-		response = response .. "[b]Generisch[/b] \n?[Menge],[Würfel]\n? -> 1w6 \n! -> 1w20"
-		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
-	elseif (message == "!dsa" or message == "!dsa4") and aktiv then
-		system = "dsa"
-		print("System DSA 4.1")
-		response = response .. "\n[b]System DSA 4.1[/b]"
-		--response = response .. "\n[b]System DSA[/b] \n![Wert] -> 1w20 Probe\n" 
-		--response = response .. "![Attributwert],[Attributwert],[Attributwert],[Talentwert],<optional Mod> -> 3w20 Probe\n"
-		--response = response .. "[b]Generisch[/b] \n? -> 1w6 \n! -> 1w20"
-		--response = response .. "\n?[Menge],[Würfel]"
-		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
-	elseif (message == "!sr" or message == "!sr5") and aktiv then
-		system = "sr"
-		print("System Shadowrun 5")
-		response = response .. "\n[b]System Shadowrun 5[/b]"
-		--response = response .. "\n[b]System Shadowrun[/b] \n![Wert] -> [Wert]w6 Probe\n" 
-		--response = response .. "![Wert],e -> Exploding w6 Probe\n"
-		--response = response .. "[b]Generisch[/b] \n?[Menge],[Würfel]"
-		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
-	elseif (message == "!kat" or message == "!deg") and aktiv then
-		system = "kat"
-		print("System KatharSys aka	Degenesis")
-		response = response .. "\n[b]System KatharSys aka Degenesis[/b]"
-		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
-	elseif message == "!off" and aktiv and fromUniqueIdentifier == owner then
-		aktiv = false
-		system = nil
-		print("Tool Aus")
-		ts3.requestSendChannelTextMsg(serverConnectionHandlerID, "[b]Tool Aus[/b]", 0)
-	else
+	if fromUniqueIdentifier == owner then
+		if message == "!on" or message == "!dice" then 
+			aktiv = true
+			print("Tool Aktiv")
+			response = "[b]Tool Aktiv[/b]\n !help -> Zeigt Commands an"
+			--response = "[b]Tool Aktiv[/b]\nFolgende Befehle sind funktional \n!dsa - System DSA \n!sr- System Shadowrun \n?[Menge],[Würfel] \n!off - Tool aus"
+			ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+		elseif aktiv then
+			if message == "!help" then
+				response = response .. "\nFolgende Befehle sind funktional \n!dsa - System DSA \n!sr- System Shadowrun \n?[Menge],[Würfel] \n!off - Tool aus\n"
+				response = response .. "\n[b]System DSA[/b] \n![Wert] -> 1w20 Probe\n" 
+				response = response .. "![Attributwert],[Attributwert],[Attributwert],[Talentwert],<optional Mod> -> 3w20 Probe\n"
+				response = response .. "\n[b]System Shadowrun[/b] \n![Wert] -> [Wert]w6 Probe\n" 
+				response = response .. "![Wert],e -> Exploding w6 Probe\n"
+				response = response .. "[b]Generisch[/b] \n?[Menge],[Würfel]\n? -> 1w6 \n! -> 1w20"
+				ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+			elseif message == "!dsa" or message == "!dsa4" then
+				system = "dsa"
+				print("System DSA 4.1")
+				response = response .. "\n[b]System DSA 4.1[/b]"
+				--response = response .. "\n[b]System DSA[/b] \n![Wert] -> 1w20 Probe\n" 
+				--response = response .. "![Attributwert],[Attributwert],[Attributwert],[Talentwert],<optional Mod> -> 3w20 Probe\n"
+				--response = response .. "[b]Generisch[/b] \n? -> 1w6 \n! -> 1w20"
+				--response = response .. "\n?[Menge],[Würfel]"
+				ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+			elseif message == "!sr" or message == "!sr5" then
+				system = "sr"
+				print("System Shadowrun 5")
+				response = response .. "\n[b]System Shadowrun 5[/b]"
+				--response = response .. "\n[b]System Shadowrun[/b] \n![Wert] -> [Wert]w6 Probe\n" 
+				--response = response .. "![Wert],e -> Exploding w6 Probe\n"
+				--response = response .. "[b]Generisch[/b] \n?[Menge],[Würfel]"
+				ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+			elseif message == "!kat" or message == "!deg" then
+				system = "kat"
+				print("System KatharSys aka	Degenesis")
+				response = response .. "\n[b]System KatharSys aka Degenesis[/b]"
+				ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+			elseif message == "!off" then
+				aktiv = false
+				system = nil
+				print("Tool Aus")
+				ts3.requestSendChannelTextMsg(serverConnectionHandlerID, "[b]Tool Aus[/b]", 0)
+			else
+			end
+		else
+		end
 	end
-	
-	print("Roller: onTextMessageEvent: " .. serverConnectionHandlerID .. " " .. targetMode .. " " .. toID .. " " .. fromID .. " " .. fromName .. " " .. fromUniqueIdentifier .. " " .. message .. " " .. ffIgnored)
-	return 0
-end
 
 
 roller_events = {
@@ -472,5 +473,6 @@ roller_events = {
 roller_events = {
 	onTextMessageEvent = onTextMessageEvent,
 }
+
 
 
