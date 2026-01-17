@@ -466,15 +466,16 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		else
 		end
 	end
+end
 
+roller_events = {
+	onTextMessageEvent = onTextMessageEvent,
+}
 
 roller_events = {
 	onTextMessageEvent = onTextMessageEvent,
 }
 
-roller_events = {
-	onTextMessageEvent = onTextMessageEvent,
-}
 
 
 
