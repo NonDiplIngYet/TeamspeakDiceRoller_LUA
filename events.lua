@@ -113,7 +113,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		end
 		local change = values[5]
 		
-		if att2 == nil and att3 == nil and skill == nil then
+		if att2 == nil then
 			simple = true
 		end
 		print("Attribut 1: " .. att1)
