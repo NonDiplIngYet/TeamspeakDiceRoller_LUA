@@ -217,27 +217,27 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 						print("Att1: " .. att1 .. " Att2: " .. att2 .. " Att3: " .. att3)
 						print("W1: " .. roll1 .. " W2: " .. roll2 .. " W3: " .. roll3)
 						if restSkill >= 0 and restSkill <= skill and krit <=1 and patz <=1 then
-							taps = restSkill
-							response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
+							taps = math.max(1, restSkill)
+							response = response .. "Daher ist die Probe bestanden mit [b]" .. taps .. " TaP* [/b] "
 							print("Mit " .. taps .. " TaP* bestanden")		
 						elseif restSkill >= 0 and restSkill > skill and krit <=1 and patz <=1 then
-							taps = skill
-							response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
+							taps = math.max(1, skill)
+							response = response .. "Daher ist die Probe bestanden mit [b]" .. taps .. " TaP* [/b] "
 							print("Mit " .. taps .. " TaP* bestanden")		
 						elseif restSkill < 0 and krit <=1 and patz <=1 then
 							response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
 							print("Notwendige Erleichterung: " .. math.abs(restSkill))
 						elseif restSkill >= 0 and restSkill <= skill and krit >1 then
-							taps = restSkill					
-							response = response .. "[b]KRITISCHER ERFOLG mit[/b] mit [b] " .. taps .. "* [/b] "
+							taps = math.max(1, restSkill)					
+							response = response .. "[b]KRITISCHER ERFOLG[/b] mit [b]" .. taps .. " TaP* [/b] "
 							print("Krit mit " .. taps .. " TaP* bestanden")		
 						elseif restSkill >= 0 and restSkill > skill and krit >1 then
-							taps = skill
-							response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] " .. taps .. "* [/b] "
+							taps = math.max(1, skill)
+							response = response .. "[b]KRITISCHER ERFOLG[/b] mit [b]" .. taps .. " TaP* [/b] "
 							print("Mit " .. taps .. " TaP* bestanden")			
 						elseif restSkill <= 0 and krit >1 then
-							taps = skill
-							response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b]1* [/b](Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
+							--taps = skill
+							response = response .. "[b]KRITISCHER ERFOLG[/b] mit [b]1 TaP* [/b](Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
 							print("Mit 1 TaP* bestanden")		
 						elseif restSkill < 0 and patz > 1 then
 							response = response .. "[b]PATZER.[/b] [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
@@ -254,9 +254,9 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 							att2 = att2+restSkill
 							att3 = att3+restSkill
 							if roll1 <= att1 and roll2 <= att2 and roll3 <= att3 and krit <=1 and patz <=1 then
-								response = response .. "Daher ist die Probe bestanden mit[/b] [b]1* [/b]"
+								response = response .. "Daher ist die Probe bestanden mit[/b] [b]1 TaP*[/b]"
 							elseif roll1 <= att1 and roll2 <= att2 and roll3 <= att3 and krit >1 then
-								response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] 1* [/b]"
+								response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] 1 TaP*[/b]"
 							else
 								restSkill = 0
 								if roll1 > att1 then
@@ -275,7 +275,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 									response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
 									print("Notwendige Erleichterung: " .. math.abs(restSkill))
 								elseif restSkill < 0 and krit >1 then
-									response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] 1* [/b](Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
+									response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] 1 TaP* [/b](Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
 								elseif restSkill < 0 and patz >1 then
 									response = response .. "[b]PATZER.[/b] [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
 									print("Notwendige Erleichterung: " .. math.abs(restSkill))
@@ -302,27 +302,27 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 							print("Att1: " .. att1 .. " Att2: " .. att2 .. " Att3: " .. att3)
 							print("W1: " .. roll1 .. " W2: " .. roll2 .. " W3: " .. roll3)
 							if restSkill >= 0 and restSkill <= skill and krit <=1 and patz <=1 then
-								taps = restSkill
-								response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
+								taps = math.max(1, restSkill)
+								response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. " TaP* [/b] "
 								print("Mit " .. taps .. " TaP* bestanden")		
 							elseif restSkill >= 0 and restSkill > skill and krit <=1 and patz <=1 then
-								taps = skill
-								response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
+								taps = math.max(1, skill)
+								response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. " TaP* [/b] "
 								print("Mit " .. taps .. " TaP* bestanden")		
 							elseif restSkill < 0 and krit <=1 and patz <=1 then
 								response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
 								print("Notwendige Erleichterung: " .. math.abs(restSkill))
 							elseif restSkill >= 0 and restSkill <= skill and krit >1 then
-								taps = restSkill					
-								response = response .. "[b]KRITISCHER ERFOLG mit[/b] mit [b] " .. taps .. "* [/b] "
+								taps = math.max(1, restSkill)					
+								response = response .. "[b]KRITISCHER ERFOLG[/b] mit [b] " .. taps .. " TaP* [/b] "
 								print("Krit mit " .. taps .. " TaP* bestanden")		
 							elseif restSkill >= 0 and restSkill > skill and krit >1 then
-								taps = skill
-								response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] " .. taps .. "* [/b] "
+								taps = math.max(1, skill)
+								response = response .. "[b]KRITISCHER ERFOLG[/b] mit [b] " .. taps .. " TaP* [/b] "
 								print("Mit " .. taps .. " TaP* bestanden")			
 							elseif restSkill <= 0 and krit >1 then
-								taps = skill
-								response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b]1* [/b](Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
+								--taps = math.max(1, skill)
+								response = response .. "[b]KRITISCHER ERFOLG[/b] mit [b]1 TaP* [/b](Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
 								print("Mit 1 TaP* bestanden")		
 							elseif restSkill < 0 and patz > 1 then
 								response = response .. "[b]PATZER.[/b] [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
@@ -377,22 +377,22 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 					print("Att1: " .. att1 .. " Att2: " .. att2 .. " Att3: " .. att3)
 					print("W1: " .. roll1 .. " W2: " .. roll2 .. " W3: " .. roll3)
 					if restSkill >= 0 and restSkill <= skill and krit <=1 and patz <=1 then
-						taps = restSkill			
-						response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
+						taps = math.max(1, restSkill)		
+						response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. " TaP* [/b] "
 						print("Mit " .. taps .. " TaP* bestanden")		
 					elseif restSkill < 0 and krit <=1 and patz <=1 then
 						response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
 					elseif restSkill >= 0 and restSkill <= skill and krit > 1 then
-						taps = restSkill					
-						response = response .. "[b]KRITISCHER ERFOLG mit[/b] mit [b] " .. taps .. "* [/b] "
+						taps = math.max(1, restSkill)					
+						response = response .. "[b]KRITISCHER ERFOLG[/b] mit [b] " .. taps .. " TaP* [/b] "
 						print("Krit mit " .. taps .. " TaP* bestanden")		
 					elseif restSkill >= 0 and restSkill > skill and krit >1 then
-						taps = skill
-						response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] " .. taps .. "* [/b]"
+						taps = math.max(1, skill)
+						response = response .. "[b]KRITISCHER ERFOLG[/b] mit [b] " .. taps .. " TaP* [/b]"
 						print("Mit " .. taps .. " TaP* bestanden")			
 					elseif restSkill <= 0 and krit >1 then
-						taps = skill
-						response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b]1* [/b](Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
+						--taps = skill
+						response = response .. "[b]KRITISCHER ERFOLG[/b] mit [b]1 TaP*[/b] (Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
 						print("Mit 1 TaP* bestanden")		
 					elseif restSkill < 0 and patz > 1 then
 						response = response .. "[b]PATZER.[/b] [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
@@ -542,6 +542,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 				response = response .. "\nErfolge: [b]" .. successes .. "[/b] \nTrigger: [b]" .. triggers .. "[/b]"
 			end
 			ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+		--end of KatharSys block
 		
 		-- Generic Dice Roll System
 		else
