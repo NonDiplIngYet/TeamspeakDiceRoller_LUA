@@ -9,7 +9,7 @@
 		Null-ARC | Fenrir
 
 	Version:
-		Beta 1.4
+		Beta 1.4.1
 	
     Disclaimer:
         This software is provided "as is", without warranty of any kind,

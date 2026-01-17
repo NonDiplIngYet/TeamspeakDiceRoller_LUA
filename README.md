@@ -29,8 +29,11 @@ All basic commands do still work in both specific modes
 - ?\<number1>,\<number2>   -> Rolls \<number1>d\<number2> / Is used like ?1,20 to roll 1d20 for example (more example would include ?5,6 for 5d6 and so on)
 ### DSA Mode
 - !\<stat1>  -> 1d20 against stat1
+- !\<stat1>,\<modifier> -> modified 1d20 against stat1 used in the DSA system
 - !\<stat1>,\<stat2>,\<stat3>,\<skill> -> 3d20 roll used in the DSA system
 - !\<stat1>,\<stat2>,\<stat3>,\<skill>,\<modifier> -> modified 3d20 roll used in the DSA system
+- ?\<number> -> rolls Number of D6s & sums them up
+- ?\<number>,\<modifier> -> rolls Number of D6s, sums them up & adds Modifier
 ### ShadowRun Mode
 - !\<pool> -> \<pool>d6 where 5s or 6s count as success and if half or more of the rolls are 1s it counts as glitched
 - !\<pool>,e -> same as above, but with exploding d6 on the 6

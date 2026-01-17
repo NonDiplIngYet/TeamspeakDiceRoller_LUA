@@ -1,4 +1,14 @@
 # Changelog
+
+## Beta 1.4.1
+Fixing DSA (as usual for 4.1)
+###Features
+- more user colours / unique IDs
+- different modes (rule systems) now covered in an if-elseif-else-wrapper for cleaner running
+- now "simple" single stat checks in DSA also can have boni or mali (as they're supposed to!)
+- Surprisingly severe refactoring of the DSA mode code section to facilitate that
+- The only actual new feature:
+- Multi D6 rolls with or without modifier can now be done in DSA mode via ?<dice> or ?<dice>,<modifier> for eg Regeneration, Damage, Patzertabelle, etc
 ## Beta 1.4
 Critical Update ;)
 ### Features
