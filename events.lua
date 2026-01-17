@@ -4,11 +4,12 @@
     A simple and reusable Lua-based dice rolling utility.
     Designed for online roleplaying using Teamspeak 3
 
-    Author:
+      Authors:
         Alick | Alex // DK_Alick
+		Null-ARC | Fenrir
 
 	Version:
-		Beta 1.2
+		Beta 1.3
 	
     Disclaimer:
         This software is provided "as is", without warranty of any kind,
@@ -473,6 +474,7 @@ roller_events = {
 roller_events = {
 	onTextMessageEvent = onTextMessageEvent,
 }
+
 
 
 
