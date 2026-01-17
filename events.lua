@@ -82,7 +82,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 	end
 
 	-- Dice Roll System used in DSA mode
-	if aktiv and system == "dsa" and string.sub(message, 1, 1) == "!" and message ~= "!off" and message ~= "!sr" and message ~= "!sr5" and message ~= "!kat" and message ~= "!deg" then
+	if aktiv and system == "dsa" and string.sub(message, 1, 1) == "!" and tonumber(string.sub(message, 2, 2)) then -- message ~= "!off" and message ~= "!sr" and message ~= "!sr5" and message ~= "!kat" and message ~= "!deg" then
 	--if string.sub(message, 1, 1) == "!" then				
 		print("-------- \nDSA Probe gestartet \n--------\n")
 		local content = string.sub(message, 2, 99)
@@ -278,7 +278,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 	end
 	
 	-- Dice Roll System used in SR mode
-	if aktiv and system == "sr" and string.sub(message, 1, 1) == "!" and message ~= "!off" and message ~= "!dsa" and message ~= "!dsa4" and message ~= "!kat" and message ~= "!deg" then
+	if aktiv and system == "sr" and string.sub(message, 1, 1) == "!" and tonumber(string.sub(message, 2, 2)) then -- message ~= "!off" and message ~= "!dsa" and message ~= "!dsa4" and message ~= "!kat" and message ~= "!deg" then
 		print("Generic Dice Roll for SR")
 		local content = string.sub(message, 2, 99)
 		local values = {}
@@ -370,7 +370,7 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 	end
 	
 	-- Dice Roll System used in KatharSys mode (aka Degenesis)
-	if aktiv and system == "kat" and string.sub(message, 1, 1) == "!" and message ~= "!off" and message ~= "!dsa" and message ~= "!dsa4" and message ~= "!sr" and message ~= "!sr5" then
+	if aktiv and system == "kat" and string.sub(message, 1, 1) == "!" and tonumber(string.sub(message, 2, 2)) then -- message ~= "!off" and message ~= "!dsa" and message ~= "!dsa4" and message ~= "!sr" and message ~= "!sr5" then
 		print("Generic Dice Roll for KatharSys")
 		local content = string.sub(message, 2, 99)
 		local values = {}
@@ -472,4 +472,5 @@ roller_events = {
 roller_events = {
 	onTextMessageEvent = onTextMessageEvent,
 }
+
 
