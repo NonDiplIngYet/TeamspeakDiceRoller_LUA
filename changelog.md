@@ -9,6 +9,7 @@ Fixing DSA (as usual for 4.1)
 - Surprisingly severe refactoring of the DSA mode code section to facilitate that
 - The only actual new feature:
 - Multi D6 rolls with or without modifier can now be done in DSA mode via ?<dice> or ?<dice>,<modifier> for eg Regeneration, Damage, Patzertabelle, etc
+- Addendum: Version tracking in events.lua  on activation of the tool has been added (still needs to be set manually though)
 ## Beta 1.4
 Critical Update ;)
 ### Features

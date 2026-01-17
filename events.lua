@@ -28,6 +28,8 @@ local response = ""
 local system = nil
 local OWNER_UNIQUE_ID = nil
 
+local version = "Beta 1.4.1"
+
 -- Funktion um den Owner der TS Instanz festzulegen
 function detectOwner(serverConnectionHandlerID)
 	if OWNER_UNIQUE_ID ~= nil then
@@ -570,9 +572,10 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		if message == "!on" or message == "!dice" then 
 			aktiv = true
 			print("Tool Aktiv")
-			response = "[b]Tool Aktiv[/b]\n !help -> Zeigt Commands an"
+			response = "[b]Tool Aktiv[/b] (" .. version .. ")\n !help -> Zeigt Commands an"
 			--response = "[b]Tool Aktiv[/b]\nFolgende Befehle sind funktional \n!dsa - System DSA \n!sr- System Shadowrun \n?[Menge],[Würfel] \n!off - Tool aus"
 			ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
+			print(version)
 		elseif aktiv then
 			if message == "!help" then
 				response = response .. "\nFolgende Befehle sind funktional \n!dsa - System DSA \n!sr- System Shadowrun \n?[Menge],[Würfel] \n!off - Tool aus\n"
