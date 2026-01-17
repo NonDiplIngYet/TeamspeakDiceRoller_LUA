@@ -2,11 +2,10 @@
 ## Beta 1.4
 Critical Update ;)
 ### Features
-- Introduced changelog.md
-- Krit/Patzer System for DSA in develop
--- implemented for rolls with "Erleichterung" and "simple Proben"
+- Krit/Patzer System for DSA
 - !statcheck implemented
-- Changed one of the custom color nicknames
+- Custom color now also decided by uniqueID
+- Hotfix for Syntax Error in Beta 1.3
 - Fixes some bugs by replacing them with brand new ones.
 ## Beta 1.3
 KatharSys and Catharsis
