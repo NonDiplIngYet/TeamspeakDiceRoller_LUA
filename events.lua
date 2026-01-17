@@ -9,7 +9,7 @@
 		Null-ARC | Fenrir
 
 	Version:
-		Beta 1.3
+		Beta 1.4
 	
     Disclaimer:
         This software is provided "as is", without warranty of any kind,
@@ -17,7 +17,6 @@
         arising from the use of this software.
 		
 	ToDo:
-		- Kritische Treffer / Patzer für DSA
 		- Nutzbare Code Kommentare
 		- Bessere Zufallsmethoden
 		- OOP
@@ -29,7 +28,7 @@ local response = ""
 local system = nil
 local OWNER_UNIQUE_ID = nil
 
--- Funktion um den Owner der TS INstanz festzulegen
+-- Funktion um den Owner der TS Instanz festzulegen
 function detectOwner(serverConnectionHandlerID)
 	if OWNER_UNIQUE_ID ~= nil then
         return OWNER_UNIQUE_ID
@@ -47,25 +46,30 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 	local owner = detectOwner(serverConnectionHandlerID)
 	
 	-- Special Humans get color output
-	if fromName == "Alick | Alex" then
+	if fromUniqueIdentifier == "wBjkylbtGYAuCFrysq6xlVxNAI4=" or fromName == "Alick | Alex" then
 		print("Gold")
 		response = "[color=#998811]"
 		
-	elseif (fromName == "Null-ARC | Fenrir" or fromName == "Tarek ben Nizar | NARC") then
+	elseif fromUniqueIdentifier == "yFt2I8EVb8yUb5pGKJsKrGAYkGY=" or (fromName == "Null-ARC | Fenrir" or fromName == "Tarek ben Nizar | NARC") then
 		print("Blau")
 		response = "[color=#4848FF]"
 		
-	elseif fromName == "Sir Kilmawa" then
+	elseif fromName == "Sir Kilmawa | Richard" then
 		print("Grün")
 		response = "[color=#116611]"
+		
+	elseif fromUniqueIdentifier == "HigFMJk7fVRuTBuV84J6vG+Zhow=" or fromName == "Dr. Clean// Protheos | David" then
+		print("Emperors Children Lila")
+		response = "[color=#ff00ff]"
 		
 	elseif (fromName == "Engelsleiche" or fromName == "Jadira saba Nagar" or fromName == "Cassandra vom Düsterhain") then
 		print("Petrol")
 		response = "[color=#037c6e]"
 	else
-		print("Default")
+		print("Default Color")
 		response = ""
 	end
+	
 	-- Simple D20 Roll from every mode
 	if aktiv and message == "!" then
 		print("-------- \nGeneric D20 \n--------\n")
@@ -92,6 +96,8 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		local values = {}
 		local talentMod = false
 		local simple = false
+		local krit = 0
+		local patz = 0
 		
 		for value in string.gmatch(content, "([^,]+)") do
 			table.insert(values, tonumber(value))
@@ -99,7 +105,12 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		local att1 = values[1]
 		local att2 = values[2]
 		local att3 = values[3]
-		local skill = values[4]
+		local skill
+		if values[4] ~= nil then
+			skill = values[4]
+		else
+			skill = 0
+		end
 		local change = values[5]
 		
 		if att2 == nil and att3 == nil and skill == nil then
@@ -129,9 +140,33 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 		local roll1 = roll[1]
 		local roll2 = roll[2]
 		local roll3 = roll[3]
-		print("Die Ergebnisse sind: [" .. roll1 .. ", " .. roll2 .. ", " .. roll3 .. "]")
+
+
+		if roll1 == 1 then
+			krit = krit+1
+		end
+		if roll2 == 1 then
+			krit = krit+1
+		end
+		if roll3 == 1 then
+			krit = krit+1
+		end
+
+		if roll1 == 20 then
+			patz = patz+1
+		end
+		if roll2 == 20 then
+			patz = patz+1
+		end
+		if roll3 == 20 then
+			patz = patz+1
+		end
+		
 		if simple then
 			response = response .. "[" .. roll1 .. "]\n" 
+			if roll1 == 1 or roll1 == 20 then
+				response = response .. "Bestätigungswurf: [" .. roll2 .. "]\n"
+			end
 		else
 			response = response .. " Die Würfe sind: [" .. roll1 .. ", " .. roll2 .. ", " .. roll3 .. "]\n" 
 		end
@@ -158,16 +193,31 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 				print("Rest Skill: " .. restSkill)
 				print("Att1: " .. att1 .. " Att2: " .. att2 .. " Att3: " .. att3)
 				print("W1: " .. roll1 .. " W2: " .. roll2 .. " W3: " .. roll3)
-				if restSkill >= 0 and restSkill <= skill then
+				if restSkill >= 0 and restSkill <= skill and krit <=1 and patz <=1 then
 					taps = restSkill
 					response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
 					print("Mit " .. taps .. " TaP* bestanden")		
-				elseif restSkill >= 0 and restSkill > skill then
+				elseif restSkill >= 0 and restSkill > skill and krit <=1 and patz <=1 then
 					taps = skill
 					response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
 					print("Mit " .. taps .. " TaP* bestanden")		
-				elseif restSkill < 0 then
+				elseif restSkill < 0 and krit <=1 and patz <=1 then
 					response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
+					print("Notwendige Erleichterung: " .. math.abs(restSkill))
+				elseif restSkill >= 0 and restSkill <= skill and krit >1 then
+					taps = restSkill					
+					response = response .. "[b]KRITISCHER ERFOLG mit[/b] mit [b] " .. taps .. "* [/b] "
+					print("Krit mit " .. taps .. " TaP* bestanden")		
+				elseif restSkill >= 0 and restSkill > skill and krit >1 then
+					taps = skill
+					response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] " .. taps .. "* [/b] "
+					print("Mit " .. taps .. " TaP* bestanden")			
+				elseif restSkill <= 0 and krit >1 then
+					taps = skill
+					response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b]1* [/b](Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
+					print("Mit 1 TaP* bestanden")		
+				elseif restSkill < 0 and patz > 1 then
+					response = response .. "[b]PATZER.[/b] [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
 					print("Notwendige Erleichterung: " .. math.abs(restSkill))
 				end
 			elseif change > 0 then
@@ -180,8 +230,10 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 					att1 = att1+restSkill
 					att2 = att2+restSkill
 					att3 = att3+restSkill
-					if roll1 <= att1 and roll2 <= att2 and roll3 <= att3 then
-						response = response .. "Daher ist die Probe bestanden"
+					if roll1 <= att1 and roll2 <= att2 and roll3 <= att3 and krit <=1 and patz <=1 then
+						response = response .. "Daher ist die Probe bestanden mit[/b] [b]1* [/b]"
+					elseif roll1 <= att1 and roll2 <= att2 and roll3 <= att3 and krit >1 then
+						response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] 1* [/b]"
 					else
 						restSkill = 0
 						if roll1 > att1 then
@@ -196,8 +248,13 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 							local result3 = att3-roll3
 							restSkill = restSkill+result3
 						end
-						if restSkill < 0 then
+						if restSkill < 0 and krit <=1 and patz <=1 then
 							response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
+							print("Notwendige Erleichterung: " .. math.abs(restSkill))
+						elseif restSkill < 0 and krit >1 then
+							response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] 1* [/b](Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
+						elseif restSkill < 0 and patz >1 then
+							response = response .. "[b]PATZER.[/b] [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
 							print("Notwendige Erleichterung: " .. math.abs(restSkill))
 						end
 					end
@@ -221,16 +278,31 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 					print("Rest Skill: " .. restSkill)
 					print("Att1: " .. att1 .. " Att2: " .. att2 .. " Att3: " .. att3)
 					print("W1: " .. roll1 .. " W2: " .. roll2 .. " W3: " .. roll3)
-					if restSkill >= 0 and restSkill <= skill then
+					if restSkill >= 0 and restSkill <= skill and krit <=1 and patz <=1 then
 						taps = restSkill
 						response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
 						print("Mit " .. taps .. " TaP* bestanden")		
-					elseif restSkill >= 0 and restSkill > skill then
+					elseif restSkill >= 0 and restSkill > skill and krit <=1 and patz <=1 then
 						taps = skill
 						response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
 						print("Mit " .. taps .. " TaP* bestanden")		
-					elseif restSkill < 0 then
+					elseif restSkill < 0 and krit <=1 and patz <=1 then
 						response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
+						print("Notwendige Erleichterung: " .. math.abs(restSkill))
+					elseif restSkill >= 0 and restSkill <= skill and krit >1 then
+						taps = restSkill					
+						response = response .. "[b]KRITISCHER ERFOLG mit[/b] mit [b] " .. taps .. "* [/b] "
+						print("Krit mit " .. taps .. " TaP* bestanden")		
+					elseif restSkill >= 0 and restSkill > skill and krit >1 then
+						taps = skill
+						response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] " .. taps .. "* [/b] "
+						print("Mit " .. taps .. " TaP* bestanden")			
+					elseif restSkill <= 0 and krit >1 then
+						taps = skill
+						response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b]1* [/b](Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
+						print("Mit 1 TaP* bestanden")		
+					elseif restSkill < 0 and patz > 1 then
+						response = response .. "[b]PATZER.[/b] [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
 						print("Notwendige Erleichterung: " .. math.abs(restSkill))
 					end
 				end
@@ -240,10 +312,26 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 			print("Simple Probe")
 			if roll1 > att1 then
 				local erlei = roll1-att1
-				response = response .. "Misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. erlei				
+				if roll1 == 20 then
+					if roll2 > att1 then
+						response = response .. "PATZER. [b]\nNotwendige Erleichterung:  [/b]" .. erlei
+					else
+						response = response .. "Misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. erlei
+					end	
+				else
+					response = response .. "Misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. erlei
+				end			
 			else
 				local erschw = att1-roll1	
-				response = response .. "Bestanden. [b]\nMaximale Erschwernis:  [/b]" ..  erschw
+				if roll1 == 1 then
+					if roll2 < att1 then
+						response = response .. "KRITISCHER ERFOLG. [b]\nMaximale Erschwernis:  [/b]" ..  erschw
+					else
+						response = response .. "Bestanden. [b]\nMaximale Erschwernis:  [/b]" ..  erschw
+					end	
+				else
+					response = response .. "Bestanden. [b]\nMaximale Erschwernis:  [/b]" ..  erschw
+				end	
 			end
 			print("Att1: " .. att1)
 			print("W1: " .. roll1)
@@ -265,13 +353,28 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 			print("Rest Skill: " .. restSkill)
 			print("Att1: " .. att1 .. " Att2: " .. att2 .. " Att3: " .. att3)
 			print("W1: " .. roll1 .. " W2: " .. roll2 .. " W3: " .. roll3)
-			if restSkill >= 0 and restSkill <= skill then
+			if restSkill >= 0 and restSkill <= skill and krit <=1 and patz <=1 then
 				taps = restSkill			
 				response = response .. "Daher ist die Probe bestanden mit [b] " .. taps .. "* [/b] "
 				print("Mit " .. taps .. " TaP* bestanden")		
-			elseif restSkill < 0 then
+			elseif restSkill < 0 and krit <=1 and patz <=1 then
 				response = response .. "Daher ist die Probe misslungen. [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
-				--print("Notwendige Erleichterung: " .. math.abs(restSkill))
+			elseif restSkill >= 0 and restSkill <= skill and krit > 1 then
+				taps = restSkill					
+				response = response .. "[b]KRITISCHER ERFOLG mit[/b] mit [b] " .. taps .. "* [/b] "
+				print("Krit mit " .. taps .. " TaP* bestanden")		
+			elseif restSkill >= 0 and restSkill > skill and krit >1 then
+				taps = skill
+				response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b] " .. taps .. "* [/b]"
+				print("Mit " .. taps .. " TaP* bestanden")			
+			elseif restSkill <= 0 and krit >1 then
+				taps = skill
+				response = response .. "[b]KRITISCHER ERFOLG mit[/b] [b]1* [/b](Aber eigentlich Misserfolg ¯\\_(ツ)_/¯)"
+				print("Mit 1 TaP* bestanden")		
+			elseif restSkill < 0 and patz > 1 then
+				response = response .. "[b]PATZER.[/b] [b]\nNotwendige Erleichterung:  [/b]" .. math.abs(restSkill)
+				print("Notwendige Erleichterung: " .. math.abs(restSkill))
+			--print("Notwendige Erleichterung: " .. math.abs(restSkill))
 			end
 			print("-------- \nDSA Probe beendet \n--------\n")
 		end
@@ -461,20 +564,34 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
 				system = nil
 				print("Tool Aus")
 				ts3.requestSendChannelTextMsg(serverConnectionHandlerID, "[b]Tool Aus[/b]", 0)
-			else
+			elseif 	message == "!statcheck" and aktiv then
+				local res4 = dice.averageTest(100000,4)
+				local res6 = dice.averageTest(100000,6)
+				local res8 = dice.averageTest(100000,8)
+				local res10 = dice.averageTest(100000,10)
+				local res12 = dice.averageTest(100000,12)
+				local res20 = dice.averageTest(100000,20)
+				local res100 = dice.averageTest(100000,100)
+				response = response .. "\n100000 D4 gewürfelt Durchschnitt: " .. res4
+				response = response .. "\n100000 D6 gewürfelt Durchschnitt: " .. res6
+				response = response .. "\n100000 D8 gewürfelt Durchschnitt: " .. res8
+				response = response .. "\n100000 D10 gewürfelt Durchschnitt: " .. res10
+				response = response .. "\n100000 D12 gewürfelt Durchschnitt: " .. res12
+				response = response .. "\n100000 D20 gewürfelt Durchschnitt: " .. res20
+				response = response .. "\n100000 D100 gewürfelt Durchschnitt: " .. res100
+				ts3.requestSendChannelTextMsg(serverConnectionHandlerID, response, 0)
 			end
-		else
 		end
 	end
-	print("Roller: onTextMessageEvent: " .. serverConnectionHandlerID .. " " .. targetMode .. " " .. toID .. " " .. fromID .. " " .. fromName .. " " .. fromUniqueIdentifier .. " " .. message .. " " .. ffIgnored)
-	return 0
 end
 
 roller_events = {
 	onTextMessageEvent = onTextMessageEvent,
 }
 
-
+roller_events = {
+	onTextMessageEvent = onTextMessageEvent,
+}
 
 
 
