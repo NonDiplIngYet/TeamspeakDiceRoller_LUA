@@ -1,7 +1,4 @@
-# TeamspeakDiceRoller - Refactored Merged Edition
-
-A modular, maintainable Lua-based dice rolling utility designed for online roleplaying via TeamSpeak 3's Lua plugin. This edition merges contributions from both `alick-changes` and `nullArc-changes` and introduces a flattened, module-driven architecture for improved code organization and extensibility.
-
+# TeamspeakDiceRoller
 ## Overview
 
 **TeamspeakDiceRoller** is a specialized tool for tabletop RPG players using TeamSpeak 3 to coordinate gameplay. It provides deterministic, fair dice rolling across multiple game systems, with role-specific formatting, custom user colors, and system-agnostic generic rolls.
@@ -19,15 +16,6 @@ The tool supports dedicated rule implementations for:
 - **Blades in the Dark** (BitD) – d6 pool with critical success on multiple sixes
 - **Powered by the Apocalypse** (PBtA) – 2d6 + modifier with tiered success thresholds
 - **Generic Dice** – Flexible `XdY[±modifier]` notation for any system or ad-hoc rolls
-
-### Core Capabilities
-
-- **User Color System** – Assign custom colors or hex codes to players for chat visibility and personality
-- **Color Presets** – Built-in color map (gold, blau/blue, grün/green, lila/purple, petrol, teal, rot/red, violett/violet, bordeaux, white)
-- **Simple Rolls** – Quick one-command rolls: `!` (1d20), `?` (1d6), `!!` (1d100), `??` (1d66)
-- **Owner Control** – Admin-only system activation, mode switching, and tool on/off
-- **Statistics Check** – `!statcheck` rolls 100,000 dice per type to verify RNG distribution
-- **Help System** – `!help` / `!hilfe` displays available commands
 
 ## Installation
 
@@ -70,191 +58,314 @@ The tool supports dedicated rule implementations for:
 
 ## Usage
 
-### Basic Commands (Always Active)
+### Quick Reference: All Commands
 
-When the tool is enabled (`!on` / `!dice`), these commands work in any system mode:
+**Note:** Commands requiring **[Owner Only]** can only be executed by the tool owner (the client who activated the plugin). All other commands work when the tool is enabled.
 
-| Command | Effect |
-|---------|--------|
-| `!` | Roll 1d20 |
-| `?` | Roll 1d6 |
-| `!!` | Roll 1d100 |
-| `??` | Roll 1d66 (2d6 as two-digit hex number) |
-| `!help` / `!hilfe` | Display available commands |
-| `!farbe,<color_name>` | Set user color (e.g., `!farbe,gold` or `!farbe,#FF5733`) |
+#### Activation & Control (Owner Only)
 
-### System Activation (Owner Only)
+| Command | Syntax | Description |
+|---------|--------|-------------|
+| **Activation** | `!on` or `!dice` | Activate the addon; enables all dice rolling and game mode features |
+| **Deactivation** | `!off` | Deactivate the addon; stops responding to commands |
+| **Help** | `!help` or `!hilfe` | Show available commands and quick reference |
 
-| Command | System | Mode |
-|---------|--------|------|
-| `!on` / `!dice` | Tool Activation | Enables all dice rolling features |
-| `!dsa` / `!dsa4` | DSA 4.1 | German d20/d20/d20 system |
-| `!sr` / `!sr5` | Shadowrun 5 | Pool-based d6 system |
-| `!coc` / `!call` | Call of Cthulhu | d100 percentile system |
-| `!kat` / `!deg` | KatharSys | Modified pool d6 system |
-| `!bitd` / `!blades` | Blades in the Dark | d6 pool system |
-| `!pbta` / `!apoc` | Powered by the Apocalypse | 2d6 + modifier system |
-| `!off` | Deactivate Tool | Disables all rolling |
-| `!statcheck` | Statistics Verification | Test RNG with 100k rolls per die type |
+#### Simple Rolls (Always Active When Enabled)
 
-### DSA 4.1 Mode
+These quick-access rolls work in any system mode and require no parameters.
 
-#### Attribute Check (1d20)
+| Command | Result | Description |
+|---------|--------|-------------|
+| `!` | 1d20 | Roll a single 20-sided die |
+| `?` | 1d6 | Roll a single 6-sided die |
+| `!!` | 1d100 | Roll a single percentile die (d100) |
+| `??` | 1d66 (2d6) | Roll two 6-sided dice combined as two-digit result; useful for 1W66 pools |
+
+#### Game System Selection (Owner Only)
+
+Switch the active game system. Each system has specialized dice mechanics and result interpretation.
+
+| Command | System | Mechanics |
+|---------|--------|-----------|
+| `!dsa` or `!dsa4` | DSA 4.1 (Das Schwarze Auge) | German 3d20 skill system with attributes, talent points, critical success/botch detection |
+| `!sr` or `!sr5` | Shadowrun 5 | Pool-based d6 system; successes on 5+, glitch detection, optional edge mode with exploding 6s |
+| `!coc` or `!call` | Call of Cthulhu 7E | d100 percentile system with difficulty tiers and bonus/malus dice |
+| `!kat` or `!deg` | KatharSys (Degenesis) | Modified d6 pool; auto-successes on high pools, threshold 4+, triggers on 6 |
+| `!bitd` or `!blades` | Blades in the Dark | d6 pool; outcome determined by highest die result |
+| `!pbta` or `!apoc` | Powered by the Apocalypse | 2d6 + modifier system with tiered success outcomes |
+
+#### Color System
+
+| Command | Syntax | Description |
+|---------|--------|-------------|
+| **Set Color** | `!farbe <color_name>` | Set your user color for formatted responses (works with space separators) |
+| | `!farbe <hex_code>` | Use hex color codes, e.g., `!farbe #FF5733` |
+
+**Supported color names:** See [Color System](#color-system-1) section below for the complete list of named colors (gold, blau/blue, gruen/green, rot/red, violett/violet, petrol, teal, white/weiss/weiß, bordeaux, and extended CSS-like colors).
+
+#### Diagnostics (Owner Only)
+
+| Command | Syntax | Description |
+|---------|--------|-------------|
+| **Statistics Check** | `!statcheck` | Run RNG verification test: rolls 100,000 dice of each type (d4, d6, d8, d10, d12, d20, d100) to validate random distribution |
+
+---
+
+## Detailed Command Examples
+
+### DSA 4.1 (Das Schwarze Auge / The Dark Eye)
+
+German d20/d20/d20-based skill system with attributes, talent points, and special critical/botch mechanics.
+
+#### Simple Attribute Check (1d20)
+
+A single roll against one attribute (e.g., strength, cunning).
+
+**Syntax:**
 ```
-!<stat_value>                    # Single roll against attribute
-!<stat_value>,<modifier>         # With bonus (+) or penalty (-)
-```
-
-#### Talent Check (3d20)
-```
-!<att1>,<att2>,<att3>,<skill_value>              # Full 3d20 check
-!<att1>,<att2>,<att3>,<skill_value>,<modifier>   # With difficulty modifier
-```
-
-#### Dice Pool (d6)
-```
-?<number_of_dice>                # Roll Xd6 and sum
-?<number_of_dice>,<modifier>     # Roll and add modifier
-```
-
-#### Special Rolls
-```
-!treffer                         # "Trefferzonenwurf" (hit zone roll)
-```
-
-### Shadowrun 5 Mode
-
-```
-!<pool_size>          # Roll XdY where 5+ count as success, 1s cause glitch
-!<pool_size>,e        # With edge (exploding 6s on every die)
-```
-
-### Call of Cthulhu Mode
-
-#### Skill Check
-```
-!<skill_value>                    # Roll d100 vs skill
-!<skill_value>,<bonus_dice>       # With bonus dice (reroll under original tens)
-!<skill_value>,<-malus_dice>      # With malus dice (take highest tens)
-```
-
-#### Generic Dice
-```
-?<num_dice>,<die_size>            # Roll XdY
-?<num_dice>,<die_size>,<mod>      # Roll XdY + modifier
+!<attribute_value>
+!<attribute_value>,<modifier>
 ```
 
-### KatharSys Mode
+**Examples:**
+- `!14` — Roll d20 against attribute 14
+- `!14,-2` — Roll against attribute 14 with -2 bonus
+- `!12,1` — Roll against attribute 12 with +1 penalty
 
-```
-!<pool_size>          # Roll XdY (max 12; extras auto-succeed), 4+ count, 6 = trigger
-```
+**Output:** Shows the d20 result. If the result is 1 or 20, prompts a confirmation roll (second d20).
 
-### Blades in the Dark Mode
+#### Full Talent Check (3d20 + Skill)
 
-```
-!<pool_size>          # Roll XdY, highest die determines outcome
-```
+A complete skill check involving three attributes and a skill value. Used for complex actions in DSA.
 
-### Powered by the Apocalypse Mode
-
+**Syntax:**
 ```
-!<modifier>           # Roll 2d6 + modifier
-```
-
-### Generic Rolls (Any System)
-
-```
-!<num>,<die>                # Total: roll XdY, sum result
-!<num>,<die>,<modifier>     # Total with modifier
-?<num>,<die>,<threshold>    # Pool: roll XdY, count successes at threshold+
+!<att1>,<att2>,<att3>,<skill_value>
+!<att1>,<att2>,<att3>,<skill_value>,<modifier>
 ```
 
-## Project Structure
+**Examples:**
+- `!12,13,14,8` — Check three attributes (12, 13, 14) against skill value 8
+- `!12,13,14,8,-1` — Same check with -1 difficulty modifier
+- `!12,13,14,8,2` — With +2 difficulty modifier
 
-### Directory Layout
+**Output:** Rolls 3d20. Compares each roll to the corresponding attribute. Calculates remaining talent points (TaP) and determines success/failure. Special results include:
+- **Kritischer Erfolg** (Critical Success): Multiple critical rolls (1s)
+- **Patzer** (Botch): Multiple botch rolls (20s)
 
+#### Hit Zone Roll (Trefferzonenwurf)
+
+DSA-specific combat mechanic to determine where on an opponent's body an attack lands.
+
+**Syntax:**
 ```
-merged/
-├── init.lua              # Module loader and TeamSpeak 3 event registration
-├── events.lua            # Main dispatcher and event handler (flattened, low indentation)
-├── dice.lua              # Core dice rolling functions (d4, d6, d8, d10, d12, d20, d100)
-├── colors.lua            # User color management and color preset map
-├── dsa.lua               # DSA 4.1 helper functions (attributes, criticals, result formatting)
-├── systems/              # Modular system-specific handlers
-│   ├── sr5.lua          # Shadowrun 5 processor
-│   ├── coc.lua          # Call of Cthulhu processor
-│   ├── kat.lua          # KatharSys processor
-│   ├── bitd.lua         # Blades in the Dark processor
-│   ├── pbta.lua         # Powered by the Apocalypse processor
-│   └── generic.lua      # Generic dice roll fallback processor
-├── changelog.md         # Release notes and version history
-├── LICENSE              # MIT License
-└── README.md            # This file
+!treffer
 ```
 
-### Module Interfaces
+**Output:** Rolls 1d20 and maps the result to a hit zone:
+- 1, 3, 5: Linkes Bein (Left Leg)
+- 2, 4, 6: Rechtes Bein (Right Leg)
+- 7–8: Bauch (Abdomen)
+- 9, 11, 13: Schildarm (Shield Arm)
+- 10, 12, 14: Schwertarm (Sword Arm)
+- 15–18: Brust (Chest)
+- 19–20: Kopf (Head)
 
-Each system module in `systems/` exports a `process(message, fromName, dice)` function that returns `(response_string, should_send_boolean)`. This standardized interface allows the main dispatcher to treat all systems uniformly and easily add new game systems.
+---
 
-## Code Architecture
+### Shadowrun 5 (Pool-Based d6 System)
 
-### Design Philosophy
+Matrix/Shadowrun d6 pool system where successes are dice showing 5 or 6, and glitches occur when half or more dice show 1s.
 
-This refactored edition prioritizes **readability and maintainability**:
+**Syntax:**
+```
+!<pool_size>
+!<pool_size>,e
+```
 
-- **Flattened dispatcher**: Early returns and guard clauses reduce indentation levels
-- **Modular systems**: Each game system is isolated in its own file, avoiding "scope pyramid" antipattern
-- **Reusable interfaces**: All system modules follow the same `process()` signature
-- **Backward compatible**: Functionality and output are identical to the pre-refactored version
+**Examples:**
+- `!6` — Roll 6d6, count successes (5+)
+- `!6,e` — Roll 6d6 with edge: 6s explode (add extra dice)
+- `!10,e` — Roll 10d6 with edge
 
-### Adding a New Game System
+**Output:**
+- Shows each die rolled
+- Counts successes (dice ≥ 5) and ones (glitch indicator)
+- Marks result as **GLITCHED** if ≥ 50% of dice are 1s
+- With edge: shows exploded dice and additional successes
 
-To add support for a new game system:
+---
 
-1. Create `merged/systems/mysystem.lua` with:
-   ```lua
-   local M = {}
-   function M.process(message, fromName, dice)
-       -- Parse message, call dice.rollDice(), format response
-       return response_string, true  -- or false if unhandled
-   end
-   return M
-   ```
+### Call of Cthulhu 7E (d100 Percentile System)
 
-2. In `merged/events.lua`, add to the `systems` table:
-   ```lua
-   local systems = {
-       sr5 = require("roller/systems/sr5"),
-       -- ... existing systems ...
-       mysystem = require("roller/systems/mysystem"),
-   }
-   ```
+Horror RPG using d100 (percentile) rolls with difficulty scaling and critical/fumble mechanics.
 
-3. Add system activation in the admin command handler:
-   ```lua
-   if message == "!mysys" then
-       system = "mysystem"
-       sendResponse(serverConnectionHandlerID, response .. "\n[b]My System[/b]")
-       return
-   end
-   ```
+**Syntax (Skill Check):**
+```
+!<skill_value>
+!<skill_value>,<bonus_dice>
+!<skill_value>,<-malus_dice>
+```
 
-## Dependencies
+**Examples:**
+- `!45` — Roll d100 vs skill 45
+- `!45,2` — Roll with 2 bonus dice (reroll tens under original)
+- `!45,-1` — Roll with 1 malus die (take highest tens)
 
-- **Lua 5.1+** (provided by TeamSpeak 3 Lua plugin)
-- **TeamSpeak 3 API** (ts3, ts3defs) – provided by the plugin environment
-- **No external Lua libraries** – all functionality is built-in or derived from std library
+**Output:** Shows d100 result. Determines outcome based on tiers:
+- **Kritischer Erfolg** (1): Critical success
+- **Extremer Erfolg** (≤ Skill/5): Extreme success
+- **Schwieriger Erfolg** (≤ Skill/2): Hard success
+- **Erfolg** (≤ Skill): Regular success
+- **Misserfolg** (> Skill): Failure
+- **Patzer** (96–99 or 100): Botch/Fumble
 
-## Contributing
+**Generic Pool Mode (within CoC):**
+```
+?<num_dice>,<die_size>
+?<num_dice>,<die_size>,<modifier>
+```
 
-Contributions are welcome! To suggest improvements or report issues:
+Examples:
+- `?3,6` — Roll 3d6
+- `?4,6,1` — Roll 4d6 + 1
 
-1. Test your changes thoroughly in a TeamSpeak 3 environment
-2. Ensure backward compatibility with existing commands
-3. Follow the existing code style and module pattern
-4. Update both `README.md` and `README_german.md` if adding features
-5. Submit changes via pull request or issue tracker
+---
+
+### KatharSys / Degenesis (Modified d6 Pool)
+
+Degenesis system with auto-success mechanics, 4+ threshold, and trigger tracking on 6s.
+
+**Syntax:**
+```
+!<pool_size>
+```
+
+**Examples:**
+- `!5` — Roll 5d6
+- `!12` — Roll 12d6 (or auto-succeed if pool is very high)
+
+**Output:**
+- Rolls specified number of d6
+- Counts successes on 4+
+- Tracks triggers on 6s
+- Applies auto-success rules for pools exceeding threshold
+
+---
+
+### Blades in the Dark (d6 Pool + Highest Die)
+
+Powered by the Apocalypse-adjacent system where the highest die determines outcome severity.
+
+**Syntax:**
+```
+!<pool_size>
+```
+
+**Examples:**
+- `!3` — Roll 3d6
+- `!2` — Roll 2d6
+
+**Output:** Rolls pool of d6s. Outcome determined by **highest die**:
+- **Critical Success** (multiple 6s)
+- **Full Success** (6+)
+- **Partial Success** (4–5)
+- **Miss** (1–3)
+
+---
+
+### Powered by the Apocalypse (2d6 + Modifier)
+
+PBtA-based system using 2d6 + modifier with tiered success outcomes.
+
+**Syntax:**
+```
+!<modifier>
+```
+
+**Examples:**
+- `!0` — Roll 2d6 + 0
+- `!1` — Roll 2d6 + 1
+- `!-1` — Roll 2d6 - 1
+
+**Output:** Rolls 2d6, applies modifier, determines outcome:
+- **Voller Erfolg** (Full Success): 10+
+- **Teilerfolg** (Partial Success): 7–9
+- **Fehlschlag** (Failure/Miss): 6 or less
+
+---
+
+### Generic Dice Rolls (Fallback for Any System)
+
+When in a system without a matching roll pattern, or for ad-hoc rolls, use generic notation.
+
+#### XdY Total (Sum)
+
+**Syntax:**
+```
+!<num>,<die>
+!<num>,<die>,<modifier>
+```
+
+**Examples:**
+- `!3,6` — Roll 3d6, sum result
+- `!2,20` — Roll 2d20, sum result
+- `!4,6,3` — Roll 4d6, add +3 modifier
+
+**Output:** Shows each die rolled, sum, and final result (with modifier if provided).
+
+#### XdY Pool (Success Threshold)
+
+Roll XdY and count successes against a threshold value.
+
+**Syntax:**
+```
+?<num>,<die>,<threshold>
+```
+
+**Examples:**
+- `?5,6,4` — Roll 5d6, count dice ≥ 4 as successes
+- `?8,10,5` — Roll 8d10, count dice ≥ 5 as successes
+- `?4,6,1` — Roll 4d6, count all as auto-successes (threshold 1)
+
+**Output:**
+- Shows each die result (bold for successes, italics for 1s)
+- Counts and displays total successes
+- Notes any 1s rolled
+
+---
+
+## Color System
+
+Every player can set a custom color to make their rolled results stand out in the TeamSpeak channel chat. Colors are applied to the entire response output.
+
+### Setting Your Color
+
+**Command:**
+```
+!farbe <color_name>
+!farbe <hex_code>
+```
+
+**Examples:**
+```
+!farbe gold           # Use named color "gold"
+!farbe blau           # Use German alias for blue
+!farbe #FF5733        # Use hex color code
+!farbe weiss          # German spelling (ß or ss both work)
+```
+
+### Available Named Colors
+
+The addon includes 100+ color names (English and German aliases)
+
+### Hex Color Format
+
+Use hex color codes for precise color selection:
+- Format: `#RRGGBB` (6 hexadecimal digits)
+- Example: `!farbe #FF00FF` (magenta)
+
+---
 
 ## License
 
@@ -262,18 +373,5 @@ MIT License – See [LICENSE](LICENSE) file for details.
 
 ## Authors
 
-- **Alick | Alex** (DK_Alick) – Original DSA implementation, color system
-- **Null-ARC | Fenrir** (nullArc-changes) – Extended systems (CoC, KatharSys, Blades, PBtA), generic rolls
-- **Merged & Refactored** – Unified architecture, modular dispatcher, flattened control flow
-
-## Support
-
-For issues, questions, or feature requests:
-
-1. Check the [MERGE_NOTES.md](MERGE_NOTES.md) for merge-specific details
-2. Review the [changelog.md](changelog.md) for recent changes
-3. Verify installation and system setup per the **Installation** section above
-
----
-
-**Enjoy fair, deterministic dice rolls across all your favorite TTRPGs!**
+- **Alick | Alex**
+- **Null-ARC | Fenrir**
