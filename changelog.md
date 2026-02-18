@@ -1,5 +1,9 @@
 # Changelog - TeamspeakDiceRoller
-
+## Patch 1.1.0 - 2026-02-18
+The Boomer Patch (Das ham' wa' immer scho' so g'macht)
+### Added
+#### Parenthesis System
+- Added a full roll System using the format (1w20) or (1d20) where the first number is the count and the second number the size of the die
 ## Hotfix 1.0.5 - 2026-02-18
 - Fixed the !help command
 ## Hotfix 1.0.4 - 2026-02-18

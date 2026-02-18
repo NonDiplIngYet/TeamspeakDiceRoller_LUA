@@ -31,7 +31,7 @@ local system = nil
 local memory = nil
 local OWNER_UNIQUE_ID = nil
 
-local version = "1.0.5"
+local version = "1.1.0"
 
 -- Centralized list of commands for help output (grouped and documented)
 local commandsList = {
@@ -45,6 +45,7 @@ local commandsList = {
             { cmd = "!<count>,<dice>,<optional>", desc = "<count>d<dice>+<optional>" },
             { cmd = "?<count>,<dice>,<schwelle>", desc = "<count>d<dice> Erfolge über <schwelle>" },
             { cmd = "!treffer", desc = "DSA Trefferzonenwürfel" },
+            { cmd = "(1w20) / (1d20)", desc = "<count>d<dice>" },
         }
     },
     {
@@ -224,6 +225,40 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
             return 
         end
         
+        -- Parenthesis-based generic roll: (1w20) or (1d20) - available regardless of selected system
+        do
+            local parenMatches = input.matchPattern(normalizedMsg, "^%((%d+)%s*[wd]%s*(%d+)%)$")
+            if parenMatches and #parenMatches >= 2 then
+                local cnt = tonumber(parenMatches[1])
+                local size = tonumber(parenMatches[2])
+                local MAX_COUNT, MAX_SIZE = 50, 100000
+                if not cnt or not size or cnt < 1 or size < 2 then
+                    sendResponse(serverConnectionHandlerID, response .. "Ungültiges Wurf-Format. Verwende (AnzahlwGröße), z.B. (3w6)")
+                    return
+                end
+                if cnt > MAX_COUNT then
+                    sendResponse(serverConnectionHandlerID, response .. "Zu viele Würfel angefordert (max " .. MAX_COUNT .. ")")
+                    return
+                end
+                if size > MAX_SIZE then
+                    sendResponse(serverConnectionHandlerID, response .. "Unzulässige Würfelgröße (max " .. MAX_SIZE .. ")")
+                    return
+                end
+
+                local rolls = dice.rollDice(cnt, size)
+                local parts = {}
+                local sum = 0
+                for _, r in ipairs(rolls) do
+                    parts[#parts + 1] = tostring(r)
+                    sum = sum + (tonumber(r) or 0)
+                end
+                local rollStr = table.concat(parts, ", ")
+                local resp = "\n[b]" .. fromName .. "[/b] würfelt " .. cnt .. "W" .. size .. "[b]\n" .. rollStr .. "[/b] \n(Summe: " .. sum .. ")"
+                sendResponse(serverConnectionHandlerID, response .. resp)
+                return
+            end
+        end
+
         if input.commandMatchesAny(message, {"!treffer", "!treff"}) then
 			print("Treff")
 			local tz = dice.d20()[1]
