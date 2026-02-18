@@ -1,5 +1,9 @@
 # Changelog - TeamspeakDiceRoller
 
+## Hotfix 1.0.5 - 2026-02-18
+- Fixed the !help command
+## Hotfix 1.0.4 - 2026-02-18
+- Fixed formatting issues in the DSA module
 ## Hotfix 1.0.3 - 2026-02-17
 - Fixed a bug in the DSA module when using "0" as erschwernis/erleichterung
 ## Hotfix 1.0.2 - 2026-02-17
