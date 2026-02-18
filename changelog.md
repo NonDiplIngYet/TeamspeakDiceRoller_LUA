@@ -1,5 +1,11 @@
 # Changelog - TeamspeakDiceRoller
 
+## Hotfix 1.0.3 - 2026-02-17
+- Fixed a bug in the DSA module when using "0" as erschwernis/erleichterung
+## Hotfix 1.0.2 - 2026-02-17
+- Added support for inline comments while rolling. Everything after # is ignored
+## Hotfix 1.0.1 - 2026-02-17
+- Removed dsa.lua from top level folder
 ## Release 1.0.0 - 2026-02-17
 The British Museum Update (Removed most Pyramids)
 ### Overview
