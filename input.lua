@@ -312,6 +312,56 @@ local function stripTrailingComment(str)
     return result
 end
 
+-- Parse parenthesis-based generic roll notation such as (3w6+2) or (1 d 20 - 3)
+-- Format: <count>d/w<size> with optional +/- modifier
+-- @param str: input string
+-- @return: count, size, modifier or nil if invalid
+local function parseParenthesisRoll(str)
+    if not str then return nil end
+
+    local normalized = normalize(str, true)
+    if normalized == "" then return nil end
+    if normalized:sub(1, 1) ~= "(" or normalized:sub(-1) ~= ")" then return nil end
+
+    local inner = trim(normalized:sub(2, -2))
+    if inner == "" then return nil end
+
+    local compactInner = inner:gsub("%s+", "")
+    local diceStart, diceEnd, diceCountStr, diceSeparator, diceSizeStr = compactInner:find("(%d+)([dw])(%d+)")
+    if not diceStart or not diceEnd then return nil end
+
+    local prefix = compactInner:sub(1, diceStart - 1)
+    local suffix = compactInner:sub(diceEnd + 1)
+    local count = tonumber(diceCountStr)
+    local size = tonumber(diceSizeStr)
+    if not count or not size or count < 1 or size < 2 then return nil end
+
+    local mod = 0
+    if prefix ~= "" and suffix ~= "" then
+        return nil
+    end
+
+    if prefix ~= "" then
+        local sign, numStr = prefix:match("^([+-]?%d+)([+-])$")
+        if not sign or not numStr then
+            return nil
+        end
+        local num = tonumber(sign)
+        if not num then return nil end
+        mod = numStr == "-" and -num or num
+    elseif suffix ~= "" then
+        local sign, numStr = suffix:match("^([+-])(%d+)$")
+        if not sign or not numStr then
+            return nil
+        end
+        local num = tonumber(numStr)
+        if not num then return nil end
+        mod = sign == "-" and -num or num
+    end
+
+    return count, size, mod
+end
+
 print("[TSDiceRoller] Input module initialization complete")
 
 local Input = {
@@ -329,6 +379,7 @@ local Input = {
     splitFirstChar = splitFirstChar,
     matchPattern = matchPattern,
     stripTrailingComment = stripTrailingComment,
+    parseParenthesisRoll = parseParenthesisRoll,
 }
 
 return Input

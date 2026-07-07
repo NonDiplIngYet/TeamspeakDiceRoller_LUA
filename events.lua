@@ -231,23 +231,10 @@ local function onTextMessageEvent(serverConnectionHandlerID, targetMode, toID, f
         
         -- Parenthesis-based generic roll: (1w20) or (1d20) - available regardless of selected system
         do
-            local parenMatches = input.matchPattern(normalizedMsg, "^%(%s*(%d+)%s*[dw]%s*(%d+)%s*([+%-0-9]*)%s*%)$")
-            if parenMatches and #parenMatches >= 2 then
-                local cnt = tonumber(parenMatches[1])
-                local size = tonumber(parenMatches[2])
-                local modStr = parenMatches[3]
-                local mod = 0
-                if modStr and modStr ~= "" then
-                    local sign, numStr = modStr:match("^([+-]?)%s*(%d+)$")
-                    local num = tonumber(numStr)
-                    if sign == "-" then
-                        mod = -num
-                    else
-                        mod = num
-                    end
-                end
+            local cnt, size, mod = input.parseParenthesisRoll(normalizedMsg)
+            if cnt and size then
                 local MAX_COUNT, MAX_SIZE = 50, 100000
-                if not cnt or not size or cnt < 1 or size < 2 then
+                if cnt < 1 or size < 2 then
                     sendResponse(serverConnectionHandlerID, response .. "Ungültiges Wurf-Format. Verwende (AnzahlwGröße[+/-Mod]), z.B. (3w6+2)")
                     return
                 end
