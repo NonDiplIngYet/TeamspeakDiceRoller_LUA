@@ -3,7 +3,14 @@ print("[TSDiceRoller] SR5 system module loading")
 
 local function process(message, fromName, dice)
     print("[TSDiceRoller] SR5 system process() called with message=" .. tostring(message) .. ", fromName=" .. tostring(fromName))
-    local content = input.safeSubstring(message, 2, 99)
+    local trimmedMessage = input.trim(message or "")
+    local first = input.safeSubstring(trimmedMessage, 1, 1)
+    if first ~= "!" then
+        print("[TSDiceRoller] SR5 system: ignoring message without '!' prefix")
+        return "", false
+    end
+
+    local content = input.safeSubstring(trimmedMessage, 2, 99)
     print("[TSDiceRoller] SR5 system: content=" .. tostring(content))
     
     -- Parse and trim parameters
